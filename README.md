@@ -16,10 +16,21 @@ wsl --list --verbose
 
 2. Install Docker Desktop and activate the WSL Integration in
  
-   ***settings*** >> ***Resources*** >> ***WSL Integration***
+   ***Settings*** >> ***Resources*** >> ***WSL Integration*** >> ***Apply & Restart***
 
 Then check the Isntallation with the same command as in the first step
 
-1. Follow the step by step guide in [How To Install Minikube on Ubuntu](https://computingforgeeks.com/how-to-install-minikube-on-ubuntu-debian-linux/) to install Minikube. ***Skip the second step***
+3. Follow the step by step guide in [How To Install Minikube on Ubuntu](https://computingforgeeks.com/how-to-install-minikube-on-ubuntu-debian-linux/) to install Minikube. ***Skip the second step***
 
+
+Set an alias for kubectl as ***k*** and enable the alias for auto-completion:
+```
+echo 'alias k=kubectl' >>~/.bashrc
+echo 'complete -o default -F __start_kubectl k' >>~/.bashrc
+```
+
+To reach the services and running apps, use port forwarding feature in kubectl
+```
+kubectl port-forward svc/SVC_NAME HOST_PORT:SVC_PORT
+```
 
