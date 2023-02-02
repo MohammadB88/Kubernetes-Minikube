@@ -14,10 +14,12 @@ Here are the steps to get Minikube installed and running on WSL in Windows 10:
 wsl --list --verbose
 ```
 
-2. Install Docker Desktop and activate the WSL Integration in 
-   **settings** >> **Resources** >> **WSL Integration**
+2. Install Docker Desktop and activate the WSL Integration in
+ 
+   ***settings*** >> ***Resources*** >> ***WSL Integration***
+
 Then check the Isntallation with the same command as in the first step
 
-3. Follow the step by step guide in [How To Install Minikube on Ubuntu](https://computingforgeeks.com/how-to-install-minikube-on-ubuntu-debian-linux/) to install Minikube. **Skip the second step**
+1. Follow the step by step guide in [How To Install Minikube on Ubuntu](https://computingforgeeks.com/how-to-install-minikube-on-ubuntu-debian-linux/) to install Minikube. ***Skip the second step***
 
 
