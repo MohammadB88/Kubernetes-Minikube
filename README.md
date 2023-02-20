@@ -10,8 +10,10 @@ Later on, I will use Ansible playbooks to automate the preparation and configura
   - [**Minimal Kubernetes Cluster**](#minimal-kubernetes-cluster)
   - [**Minikube Cluster**](#minikube-cluster)
       - [Auto-Completion and Alias for kubectl](#auto-completion-and-alias-for-kubectl)
+    - [**Metrics Server**](#metrics-server)
   - [**Health Ckeck**](#health-ckeck)
     - [**ReadinessProbe \& LivenessProbe**](#readinessprobe--livenessprobe)
+  - [**Resource Requests and Limits**](#resource-requests-and-limits)
 
 ## **Minimal Kubernetes Cluster**
 This Cluster has one controlplane and two worker nodes
@@ -46,10 +48,32 @@ To reach the services and running apps, use port forwarding feature in kubectl
 kubectl port-forward svc/SVC_NAME HOST_PORT:SVC_PORT --namespace NAMESPACE
 ```
 
+### **Metrics Server**
+The **Metrics Server addon** for Minikube is an optional component that provides resource utilization metrics for the Kubernetes cluster running in a local Minikube environment.
+
+The Metrics Server is a cluster-wide aggregator of resource usage data, including CPU and memory usage of nodes and containers. It collects this data from the kubelet, which is an agent that runs on each node in the Kubernetes cluster and is responsible for managing containers.
+
+The Metrics Server addon for Minikube provides the following benefits:
+
+   - It allows you to monitor the resource utilization of your Kubernetes cluster, which can help you identify performance issues, bottlenecks, and potential capacity constraints.
+   - It enables you to autoscale your applications based on the resource usage metrics collected by the Metrics Server, which can improve the efficiency and reliability of your Kubernetes cluster.
+   - It provides the foundation for other Kubernetes components and tools that rely on resource utilization metrics, such as the Horizontal Pod Autoscaler (HPA).
+
+To enable the Metrics Server addon in Minikube, you can use the following command:
+````
+minikube addons enable metrics-server
+````
+Once enabled, the Metrics Server will be deployed in the Minikube cluster, and you can access the resource utilization metrics using the kubectl top command. For example, you can use the following command to view the CPU and memory usage of all pods in the default namespace:
+````
+kubectl top pods/nodes
+````
+A very nice guide can also be found in the below link:
+[Minikube's addon: 'metrics-server'](http://www.mtitek.com/tutorials/kubernetes/kubernetes_metrics.php)
+
 ## **Health Ckeck**
 
 ### **ReadinessProbe & LivenessProbe**
-Kubernetes uses *readinessProbe* and *livenessProbe* to determine the health of a container in a pod.
+Kubernetes uses ***readinessProbe*** and ***livenessProbe*** to determine the health of a container in a pod.
 
 The readinessProbe tells Kubernetes whether the container is ready to receive traffic. It checks if the container is able to respond to requests and if it's ready to start accepting traffic. If the readinessProbe fails, Kubernetes will not send traffic to the container until the probe passes.
 
@@ -137,3 +161,49 @@ By default, httpGet and tcpSocket probes have a failure threshold of three conse
 
 
 [Kubernetes Liveness and Readiness Probes: How to Avoid Shooting Yourself in the Foot](https://blog.colinbreck.com/kubernetes-liveness-and-readiness-probes-how-to-avoid-shooting-yourself-in-the-foot/)
+
+
+## **Resource Requests and Limits**
+Resource Requests and Limits are important concepts in Kubernetes that help ensure the stability, reliability, and optimal utilization of the cluster.
+
+Resource Requests are the minimum amount of resources, such as CPU and memory, that a container needs to run. These requests are used by the Kubernetes scheduler to determine the best node to schedule the container on, based on the available resources on the node. By setting resource requests, you ensure that your container has enough resources to run reliably and avoid scheduling issues due to resource shortages.
+
+Resource Limits, on the other hand, are the maximum amount of resources that a container is allowed to use. If a container exceeds its resource limit, it may be terminated by Kubernetes to prevent it from hogging the resources and causing issues for other containers on the same node. By setting resource limits, you ensure that your container does not consume too many resources and affect the performance of other containers.
+
+Setting Resource Requests and Limits helps in the following ways:
+
+   - Ensuring stable and reliable operation of the containers by avoiding resource starvation.
+   - Helping Kubernetes scheduler in deciding where to schedule the container on the most suitable node based on available resources.
+   - Preventing containers from consuming excessive resources, which may cause performance issues in the cluster.
+   - Preventing a single container from hogging all the resources of a node, which could cause other containers on the same node to be affected.
+
+Therefore, it is important to set resource requests and limits for your containers to ensure the optimal use of resources in the Kubernetes cluster and avoid resource-related issues.
+
+Here's an example of how resource requests and limits might be set in a Kubernetes deployment:
+
+````
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-web-app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: my-web-app
+  template:
+    metadata:
+      labels:
+        app: my-web-app
+    spec:
+      containers:
+      - name: web
+        image: my-web-app-image
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "256Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+````
