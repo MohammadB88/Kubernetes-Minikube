@@ -9,11 +9,13 @@ Later on, I will use Ansible playbooks to automate the preparation and configura
 - [**Table of Content**](#table-of-content)
   - [**Minimal Kubernetes Cluster**](#minimal-kubernetes-cluster)
   - [**Minikube Cluster**](#minikube-cluster)
-      - [Auto-Completion and Alias for kubectl](#auto-completion-and-alias-for-kubectl)
     - [**Metrics Server**](#metrics-server)
+  - [**Auto-Completion and Alias for kubectl**](#auto-completion-and-alias-for-kubectl)
   - [**Health Ckeck**](#health-ckeck)
     - [**ReadinessProbe \& LivenessProbe**](#readinessprobe--livenessprobe)
   - [**Resource Requests and Limits**](#resource-requests-and-limits)
+  - [**Auto Scaling**](#auto-scaling)
+    - [**Horizontal Pod Autoscaling (HPA)**](#horizontal-pod-autoscaling-hpa)
 
 ## **Minimal Kubernetes Cluster**
 This Cluster has one controlplane and two worker nodes
@@ -33,20 +35,6 @@ wsl --list --verbose
 Then check the Isntallation with the same command as in the first step
 
 3. Follow the step by step guide in [How To Install Minikube on Ubuntu](https://computingforgeeks.com/how-to-install-minikube-on-ubuntu-debian-linux/) to install Minikube. ***Skip the second step***
-
-
-#### Auto-Completion and Alias for kubectl
-I have used this tutorial: [Enable Auto-completion for Kubectl in a Linux](https://spacelift.io/blog/kubectl-auto-completion).
-Set an alias for kubectl as ***k*** and enable the alias for auto-completion:
-```
-echo 'alias k=kubectl' >>~/.bashrc
-echo 'complete -o default -F __start_kubectl k' >>~/.bashrc
-```
-
-To reach the services and running apps, use port forwarding feature in kubectl
-```
-kubectl port-forward svc/SVC_NAME HOST_PORT:SVC_PORT --namespace NAMESPACE
-```
 
 ### **Metrics Server**
 The **Metrics Server addon** for Minikube is an optional component that provides resource utilization metrics for the Kubernetes cluster running in a local Minikube environment.
@@ -69,6 +57,19 @@ kubectl top pods/nodes
 ````
 A very nice guide can also be found in the below link:
 [Minikube's addon: 'metrics-server'](http://www.mtitek.com/tutorials/kubernetes/kubernetes_metrics.php)
+
+## **Auto-Completion and Alias for kubectl**
+I have used this tutorial: [Enable Auto-completion for Kubectl in a Linux](https://spacelift.io/blog/kubectl-auto-completion).
+Set an alias for kubectl as ***k*** and enable the alias for auto-completion:
+```
+echo 'alias k=kubectl' >>~/.bashrc
+echo 'complete -o default -F __start_kubectl k' >>~/.bashrc
+```
+
+To reach the services and running apps, use port forwarding feature in kubectl
+```
+kubectl port-forward svc/SVC_NAME HOST_PORT:SVC_PORT --namespace NAMESPACE
+```
 
 ## **Health Ckeck**
 
@@ -207,3 +208,51 @@ spec:
             cpu: "500m"
             memory: "512Mi"
 ````
+
+## **Auto Scaling**
+Autoscaling in Kubernetes is a feature that allows you to automatically scale your application up or down based on changes in resource utilization. Kubernetes provides several built-in autoscaling options, including Horizontal Pod Autoscaling (HPA), Vertical Pod Autoscaling (VPA), and Cluster Autoscaling.
+
+Horizontal Pod Autoscaling (HPA) is the most commonly used type of autoscaling in Kubernetes. It automatically scales the number of replicas of a deployment or replica set based on the observed CPU or memory utilization of the pods. With HPA, you can define target CPU or memory utilization for your pods, and Kubernetes will automatically adjust the number of replicas to ensure that the target utilization is met.
+
+Vertical Pod Autoscaling (VPA) adjusts the CPU and memory requests and limits for the pods based on the actual usage of resources. It is designed to help optimize the resource utilization of your pods by dynamically adjusting their resource requests and limits.
+
+Cluster Autoscaling automatically scales the number of nodes in the Kubernetes cluster based on the resource utilization of the cluster. With Cluster Autoscaling, you can ensure that your Kubernetes cluster has enough capacity to handle the workload, and you can avoid overprovisioning the cluster, which can lead to wasted resources and increased costs.
+
+Using autoscaling in Kubernetes has several benefits, including:
+
+   - **Improved availability:** Autoscaling helps ensure that your application is available and responsive even under high load conditions.
+   - **Cost optimization:** Autoscaling can help you optimize the cost of running your application by only using the resources that are necessary to handle the current workload. This can help you avoid overprovisioning and wasting resources.
+   - **Increased efficiency:** Autoscaling can help you achieve more efficient use of resources by automatically adjusting the number of replicas or nodes based on the actual resource utilization of your application.
+   - **Scalability:** Autoscaling allows you to easily handle sudden spikes in traffic or workload by automatically adding more resources to your application.
+
+Overall, autoscaling is a powerful feature in Kubernetes that can help you achieve higher availability, efficiency, and scalability for your applications while optimizing costs. It is a recommended practice for managing applications in production environments.
+
+Here are some examples of how to implement each type of autoscaling in Kubernetes:
+
+### **Horizontal Pod Autoscaling (HPA)**
+
+To enable HPA in Kubernetes, you need to have a metric server installed and running in your cluster. You can then create an HPA object that specifies the minimum and maximum number of replicas to maintain for a deployment, as well as the target resource utilization.
+
+Here's an example YAML file that creates an HPA for a deployment that targets 50% CPU utilization and scales between 1 and 10 replicas:
+````
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  creationTimestamp: null
+  name: NAME -> it usually uses DEPLOYMENT_NAME
+spec:
+  maxReplicas: 10
+  minReplicas: 1
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: DEPLOYMENT_NAME
+  targetCPUUtilizationPercentage: 60
+````
+
+
+In order to test the nginx stability, I have used Apache Bench (ab) tool to send HTTP requests to the nginx proxy. This command will be executed inside a temporary container as:
+````
+kubectl run --image httpd -it httpd -- ab -n 20000 -c 1000 http://<nginx-service-ip>:<nginx-service-port>//
+````
+After the container is created, it runs the *ab* command within the container to send 20,000 requests to the nginx service, with a maximum of 1000 concurrent requests.
