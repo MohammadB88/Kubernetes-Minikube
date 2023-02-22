@@ -250,40 +250,6 @@ spec:
   targetCPUUtilizationPercentage: 60
 ````
 
-Or the settings could be directly added inside the Deployment manifest:
-```` 
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: my-app
-spec:
-  replicas: 3
-  selector:
-    matchLabels:
-      app: my-app
-  template:
-    metadata:
-      labels:
-        app: my-app
-    spec:
-      containers:
-      - name: my-app
-        image: my-image:latest
-        ports:
-        - containerPort: 80
-        resources:
-          requests:
-            cpu: "100m"
-            memory: "256Mi"
-          limits:
-            cpu: "500m"
-            memory: "512Mi"
-      autoscaling:
-        minReplicas: 3
-        maxReplicas: 6
-        targetCPUUtilizationPercentage: 50
-````
-
 In order to test the nginx stability, I have used Apache Bench (ab) tool to send HTTP requests to the nginx proxy. This command will be executed inside a temporary container as:
 ````
 kubectl run --image httpd -it httpd -- ab -n 20000 -c 1000 http://<nginx-service-ip>:<nginx-service-port>//
